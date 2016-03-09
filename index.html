@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Git For Teams</title>
+
+		<meta name="description" content="Git explained with a team-based approach">
+		<meta name="author" content="Charles Sarrazin">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/beige.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Git For Teams</h1>
+					<h3>Git explained with a team-based approach</h3>
+					<p>
+						<small>Created by <a href="https://csarrazi.github.io">Charles Sarrazin</a> / <a href="https://twitter.com/csarrazi">@csarrazi</a></small>
+					</p>
+				</section>
+
+				<!-- <section>
+					<h2>About me</h2>
+					<p>
+						Charles Sarrazin, Lead Architect@<a href="https://sensiolabs.com">SensioLabs</a>
+					</p>
+				</section> -->
+
+				<section>
+					<section>
+						<h1>Atomic commits</h1>
+					</section>
+					<section>
+						<h2>What are we talking about ?</h2>
+						<p>One commit should have a reduced perimeter.</p>
+						<p>A commit should contain a single feature, or sub-feature.</p>
+						<p>At all times, the application should be in a consistent state.</p>
+						<p>All commits should leave the application in a <strong>working</strong> state. Thus, you should not leave WIP commits on a given branch or PR.</p>
+					</section>
+					<section>
+						<h2>The tools of the trade</h2>
+						<p>You need to master <code>add</code> and <code>reset</code>, but also <code>diff</code>, <code>show</code> and of course, <code>commit</code>.</p>
+					</section>
+					<section>
+						<h2>Enabling the detailed status</h2>
+						<p>Check the details of all new untracked files.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git status</span>
+...
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+  <u>vendor/</u>
+...
+            </code></pre>
+            <pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ </span><b class="right">git config --global status.showUntrackedFiles all</b>
+<span class="blue">$ git status</span>
+...
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+<u>  vendor/scripts/bootstrap.min.js
+  vendor/scripts/jquery.min.js
+  vendor/scripts/underscore.js</u>
+...
+            </code></pre>
+					</section>
+					<section>
+						<h2>Understanding the <em>stage</em></h2>
+						<p>The <em>stage</em>, or index: what is validated to be committed.</p>
+						<p>Lets the user customize precisely what he wishes to commit.</p>
+						<p><code>git add <em>pathspec...</em></code> = take a snapshot of <em>pathspec</em> and add this in the next commit's code.</p>
+						<p>Synonym: <code>git stage</code>. Nothing in common with <code>svn add</code>.</p>
+						<p><strong>Mandatory</strong> to version a <em>new</em> file (untracked), unlike a file which is already versioned</p>
+					</section>
+					<section>
+						<h2>Checking the <em>stage</em></h2>
+						<p>Diff version</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git diff <u>--staged</u></span>
+<span class="yellow">diff --git c/index.html i/index.html
+index 5237399..85e642f 100644
+--- c/index.html
++++ i/index.html
+@@ -1,5 +1,5 @@</span>
+ &lt;!doctype html&gt;
+<span class="red">-&lt;html&gt;</span>
+<span class="green">+&lt;html lang="fr"&gt;</span>
+
+            </code></pre>
+						<p>Snapshot version (whole file)</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git show <u>:0:pathspec</u></span>
+&lt;!doctype html&gt;
+&lt;html lang="fr"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;Git ProTips&lt;/title&gt;
+...
+            </code></pre>
+					</section>
+					<section>
+						<h2>Cleanup the diff</h2>
+						<p>Most of the time, we don't care about whitespaces.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git diff</span>
+...
+ &lt;!doctype html&gt;
+<span class="red">-&lt;html&gt;</span>
+<span class="green">+&lt;html lang="fr"&gt;</span>
+ &lt;head&gt;
+<span class="red">-  &lt;meta charset="utf-8"&gt;
+-  &lt;title&gt;Git ProTips&lt;/title&gt;</span>
+<span class="green">+  <u>  </u>&lt;meta charset="utf-8"&gt;
++  <u>  </u>&lt;title&gt;Git <u> </u>ProTips&lt;/title&gt;</span>
+...
+
+<span class="blue">$ git diff <u>-w</u></span>
+...
+ &lt;!doctype html&gt;
+<span class="red">-&lt;html&gt;</span>
+<span class="green">+&lt;html lang="fr"&gt;</span>
+ &lt;head&gt;
+...
+            </code></pre>
+					</section>
+					<section>
+						<h2>Refining the diff</h2>
+
+            <p>Line by line may be not enough, and not granular enough...</p>
+
+            <pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git diff <u>--word-diff-regex=.</u></span>
+...
+&lt;!doctype html&gt;
+&lt;html<span class="green">{+ lang="fr"+}</span>&gt;
+...
+
+<span class="blue">$ git diff <u>--color-words=.</u></span>
+...
+&lt;!doctype html&gt;
+&lt;html<span class="green"> lang="fr"</span>&gt;
+...
+            </code></pre>
+
+<p>To configure this once and for all:</p>
+
+            <pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git config --global <u>diff.wordRegex .</u>
+$ git diff <u>--word-diff</u></span>
+...
+&lt;!doctype html&gt;
+&lt;html<span class="green">{+ lang="fr"+}</span>&gt;
+...
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>File fragments</h2>
+						<p>Who said we needed to <em>stage</em> the whole file at a time?</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git add <u>-p</u> index.html</span>
+...
+ &lt;!doctype html&gt;
+<span class="red">-&lt;html&gt;</span>
+<span class="green">+&lt;html lang="fr"&gt;</span>
+ &lt;head&gt;
+...
+<span class="blue">Stage this hunk [y,n,q,a,d,/,j,J,g,e,?]?</span> <u>y</u>
+...
+   &lt;h1&gt;Git ProTips&lt;/h1&gt;
+<span class="green">+  &lt;footer&gt;© 2014 Ma Boîte&lt;/footer&gt;</span>
+...
+<span class="blue">Stage this hunk [y,n,q,a,d,/,K,g,e,?]? </span> <u>n</u>
+            </code></pre>
+            			<p>This is a <strong>critical</strong> feature to know, because in real-life, we always have 2 or 3 different things going on in the same file...</p>
+					</section>
+					<section>
+						<h2>Unstaging files</h2>
+						<p>To remove a file (or all files) from the stage, <code>git reset</code>.</p>
+						<pre><code data-trim data-noescape class="bash">
+<span class="blue">$ git <u>reset index.html</u></span>
+Unstaged changes after reset:
+M index.html
+            </code></pre>
+            			<p>Canceling the whole stage:</p>
+            			<pre><code data-trim data-noescape class="bash">
+<span class="blue">$ git <u>reset</u></span>
+Unstaged changes after reset:
+M index.html
+            </code></pre>
+					</section>
+					<section>
+						<h2>Partial unstaging</h2>
+						<p>Just like you can add files, you can unstage fragments.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git <u>reset -p index.html</u></span>
+...
+...
+ &lt;!doctype html&gt;
+<span class="red">-&lt;html&gt;</span>
+<span class="green">+&lt;html lang="fr"&gt;</span>
+ &lt;head&gt;
+...
+<span class="blue"><u>Unstage</u> this hunk [y,n,q,a,d,/,j,J,g,e,?]?</span> <u>n</u>
+...
+   &lt;h1&gt;Git ProTips&lt;/h1&gt;
+<span class="green">+  &lt;footer&gt;© 2014 Ma Boîte&lt;/footer&gt;</span>
+...
+<span class="blue"><u>Unstage</u> this hunk [y,n,q,a,d,/,K,g,e,?]? </span> <u>y</u>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Renaming and removing</h2>
+						<p><code>git add .</code> is not enough before Git 2.0: Only the working directory is taken into account, not removed files.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+Changes not staged for commit:
+...
+  <span class="red"><u>deleted</u>:    index.html</span>
+
+<u>Untracked</u> files:
+...
+  <span class="red">home.html</span>
+            </code></pre>
+						<p>To handle both known <strong>and</strong> untracked files, you should use <code>-A</code> (<code>--all</code>):</p>
+						<pre><code data-trim data-noescape class="bash">
+<span class="blue">$ git add <u>-A</u> &amp;&amp; git status</span>
+On branch master
+Changes to be committed:
+...
+  <span class="green"><u>renamed</u>:    index.html -> home.html</span>
+            </code></pre>
+					</section>
+					<section>
+						<h2>Amending</h2>
+						<h3>the latest commit</h3>
+						<p><code>git commit --amend</code> replaces the current state.</p>
+						<p>Did you forget to add a dependency?</p>
+						<pre><code data-trim data-noescape class="bash">
+<span class="blue">$ git <u>add</u> vendor/scripts/underscore.min.js
+$ git commit <u>--amend --no-edit</u></span>
+            </code></pre>
+            			<p>Versioned a sensitive file?</p>
+            			<pre><code data-trim data-noescape class="bash">
+<span class="blue">$ git <u>rm --cached</u> config/database.yml
+$ echo config/database.yml >> .gitignore &amp;&amp; git add .gitignore
+$ git commit --amend --no-edit</span>
+            </code></pre>
+            			<p>Made a typo in the message?</p>
+            			<pre><code data-trim data-noescape class="bash">
+<span class="blue">$ git commit --amend -m 'The message without typos'</span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Visualizing a commit or a snapshot</h2>
+						<p><code>git show [object]</code> displays a commit (by default <code>HEAD</code>), a tree, a snapshot...</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ <u>git show</u></span> <span class="comment"># ou explicitement : git show HEAD</span>
+<span class="yellow">commit 8a5a383</span>
+Author: Charles Sarrazin &lt;charles@sarraz.in&gt;
+Date:   Sun Oct 26 15:04:17 2014 +0100
+
+    First index
+
+<span class"yellow">diff --git a/index.html b/index.html</span>
+...
+            </code></pre>
+            			<p>The content of <code>app/initialize.js</code> on the <code>legacy</code> branch?</p>
+            			<pre><code data-trim data-noescape class="bash">
+<span class="blue">$ git show <u>legacy:app/initialize.js</u></span>
+'use strict';
+...
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Correctly using the stash</h2>
+						<p>Saving untracked files, and adding a useful message:</p>
+						<pre><code data-trim data-noescape class="bash">
+<span class="blue">(master <u>*+%</u>) $ <u>git stash save -u</u> 'BS3 migration'</span>
+Saved working directory and index state On master: BS3 migration
+HEAD is now at 8a5a383 Asynchronous GA Trackers
+<span class="blue">(master <u>$</u>) $</span>
+            </code></pre>
+            			<p>In order to let your prompt remind you that you have some stash, don't forget to activate the <code>GIT_PS1_SHOWSTASHSTATE</code> environment variable, which will add a <code>$</code>.</p>
+					</section>
+
+					<section>
+						<p>To fetch the stash, do not use <code>apply</code>, prefer <code>pop</code>:</p>
+						<pre><code data-trim data-noescape class="bash">
+<span class="blue">(master $) $ <u>git stash pop --index</u></span>
+...
+<span class="blue">(master *+%) $</span>
+            </code></pre>
+        				<p><code>pop</code> actually tries to <code>apply</code> the stash and, if it works, follows up with a <code>drop</code>. There's nothing worse than leaving a stash which was already reintegrated.</p>
+        				<p>Even if the shash saves the stage by default, the stash does not restore it by default, in order to prevent automatic merges in the stage. So please always try first with <code>--index</code>.</p>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Using the logs</h1>
+					</section>
+
+					<section>
+						<h2>Using a relevant format</h2>
+						<p>By default, the log is too verbose, without graph, etc.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+$ git config --global <u>alias.lg</u> "log <u>--graph</u> \
+  <u>--pretty=tformat</u>:'%Cred<u>%h</u>%Creset -%C(auto)<u>%d</u>%Creset <u>%s</u> \
+  %Cgreen(<u>%an</u> <u>%ar</u>)%Creset'"
+            </code></pre>
+					<img src="assets/git-lg.png" alt="Display example for git lg">
+					</section>
+
+					<section>
+						<h2>Filtering and limiting</h2>
+						<p><code>--grep</code> on complete messages</p>
+						<p><code>--author</code> on the name / email of the author</p>
+						<p><code>-- <i>pathspec...</i></code> on paths (directories, files)</p>
+						<p><code>-n</code> limits the number of lines <strong>after filtering</strong></p>
+						<pre><code data-trim data-noescape class="no-highlight">
+$ git lg --author=Beauchamp --grep '^Merge' -n10 -- app/Resources/sass
+						</code></pre>
+						<img src="assets/git-lg-filtering.png" alt="Simple log filtering">
+					</section>
+
+					<section>
+						<h2>Checking for divergence</h2>
+						<p>Want to see the commits between two branches / tags? (in short, get back to their common ancestor) Use <code>A...B</code>.</p>
+						<table class="sides">
+						<tbody>
+							<tr>
+								<td>
+									<img src="assets/git-divergence-full.png" alt="The full graph">
+								</td>
+								<td>
+									<pre><code data-trim data-noescape class="no-highlight">
+$ git lg <b class="wrong">master..bootstrap3-to-rebase</b>
+									</code></pre>
+
+									<img src="assets/git-divergence-none.png" alt="A bad listed graph">
+
+									<pre><code data-trim data-noescape class="no-highlight">
+$ git lg <b class="right">master...bootstrap3-to-rebase</b>
+									</code></pre>
+
+									<img src="assets/git-divergence-cut.png" alt="The listing limited to the divergence">
+								</td>
+							</tr>
+						</tbody>
+						</table>
+					</section>
+
+					<section>
+						<h2>Finding the culprit</h2>
+						<p>Instead of using <code>git blame</code> in order to find the culprit of a certain commit, you should search on <strong>the active contents of the diffs</strong>: results will be more precise and relevant. Also, <strong>it works for deleted lines</strong>.</p>
+						<p>Options <code>-S</code> (inserts OR deletions) and <code>-G</code> (all the diffs)</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git lg <u>-S "Donec sed"</u> -1 <u>-p</u> index.html</span>
+...
+* 6d731f3 - Content tweaks (Charles Sarrazin 1 year, 1 month ago)
+|
+| <span class="yellow">diff --git a/index.html b/index.html...</span>
+...
+| <span class="blue">@@ -60,18 +60,18 @@</span>
+...
+| &lt;h2&gt;Three-point rebasing&lt;/h2&gt;
+| <span class="red">- &lt;p&gt;<u>Donec sed</u> odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.&lt;/p&gt;</span>
+| <span class="green">+ &lt;p&gt;Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa.&lt;/p&gt;</span>
+| &lt;p&gt;&lt;a class="btn" href="#"&gt;View details &raquo;&lt;/a&gt;&lt;/p&gt;
+...
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Fragments &amp; functions</h2>
+						<p>Since Git 1.8.4 (April 2013), it is also possible to filter by file fragment, and <strong>by function body</strong>. You can use either an interval(<code>-L 1,100:index.html</code>), or a regex:</p>
+						<pre><code data-trim data-noescape class="no-highlight smaller">
+<span class="blue">$ git lg <u>-L :getCheckIns:</u>app/lib/persistence.js</span>
+* <span class="red">12164bc</span> - Refactoring gestion Check-In Details, et gestion corner-cases <span class="green">(Charles Sarrazin 2 days ago)</span>
+|
+| <span class="yellow">diff --git a/spa-final/app/lib/persistence.js b/spa-final/app/lib/persistence.js</span>
+| <span class="yellow">--- a/spa-final/app/lib/persistence.js</span>
+| <span class="yellow">+++ b/spa-final/app/lib/persistence.js</span>
+| <span class="blue">@@ -81,4 +86,7 @@</span>
+|  function <u>getCheckIns</u>() {
+| <span class="red">-  return collection.toJSON();</span>
+| <span class="green">+  return collection.map(modelWithCid);</span>
+|  }
+|
+* <span class="red">d714350</span> - Initial import <span class="green">(Charles Sarrazin 1 year ago)</span>
+
+  <span class="yellow">diff --git a/app/lib/persistence.js b/app/lib/persistence.js
+  --- /dev/null
+  +++ b/app/lib/persistence.js</span>
+  <span class="blue">@@ -0,0 +34,4 @@</span>
+  <span class="green">+function <u>getCheckIns</u>() {
+  +  return collection.toJSON();
+  +}</span>
+            </code></pre>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Choosing pushes</h1>
+						<h3>And not pushing that frequently</h3>
+					</section>
+
+					<section>
+						<h2>You should only push your current branch</h2>
+						<p>By default, when running <code>git push</code> only, Git will try:</p>
+						<p>Before 2.0: all tracked branches with the same name</p>
+						<p>After 2.0: the current branch if the tracked* branch has the same name**</p>
+						<p class="breathing">What we want: the current, regardless of the remote name**</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+$ git config --global <u>push.default upstream</u>
+            </code></pre>
+        				<footer>
+			              	* push.default = matching — same name = indentical remote and local names<br>
+			              	** push.default = simple
+			            </footer>
+					</section>
+
+					<section>
+						<h2>Initial push</h2>
+						<p>The first time you want to push a branch that you wish to track later, don't forget to track the upstream:</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(stats-v3) $ git push <u>-u</u> origin stats</span>
+Counting objects: 5, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (5/5), 488 bytes | 0 bytes/s, done.
+Total 5 (delta 0), reused 0 (delta 0)
+To git@github.com:tdd/private-tests.git
+ * <u>[new branch]      stats -> stats</u>
+<b class="right">Branch stats set up to track remote branch stats from origin.</b>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Cleaning up before pushing</h2>
+						<p>Pre-push habit: cleanup your local history, which should be more or less dirty.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+$ git lg @{u}..
+$ git rebase -i @{u}
+            </code></pre>
+        				<p>The <strong>interactive rebase</strong> helps us cleanup our work before sharing it with the rest of the team.</p>
+        				<p>Yet another reason <strong>not to push too often</strong>. You should commit often (10-30 times a day), but push more rarely (2-3 times/day).</p>
+					</section>
+
+					<section>
+						<h2>Pull ≠ Merge!</h2>
+						<p>By default, <code>git pull</code> finishes with a <code>merge</code>. This is stupid.</p>
+						<p>When you pull, you do not actually merge a remote branch locally: you update your branch with the latest changes.</p>
+						<p>Also, this makes your graph less readable:</p>
+						<img src="assets/git-pull-merge-bleark.png" alt="Dirty graph">
+					</section>
+
+					<section>
+						<h2>Pull = Rebase</h2>
+						<p>A <code>pull</code> should rather <strong>Replay your local work on the remote branch</strong>: by definition, a <code>rebase</code>.</p>
+						<p>However, you should make sure not to inline a <code>merge</code> in the local copy by mistake</p>
+						<p>In order to prevent this:</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git config --global <u>pull.rebase preserve</u></span>
+            </code></pre>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1>Working with branches</h1>
+					</section>
+
+					<section>
+						<h2>Creating a new branch</h2>
+						<p>Most of the time, when you create a branch, it is to work on the branch directly.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<b class="wrong">(master) $ git branch feature
+(master) $ git checkout feature
+(feature) $</b>
+            </code></pre>
+
+            <pre><code data-trim data-noescape class="no-highlight">
+<b class="right">(master) $ git <u>checkout -b</u> feature
+(feature) $</b>
+            </code></pre>
+            			<p>Note that if you wish to collaborate on a branch already existing on the remote, a simple <code>checkout</code> is enough.</p>
+        				<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git branch -a</span>
+* <span class="green">master</span>
+  <span class="red">origin/master</span>
+  <span class="red">origin/topic</span>
+<span class="blue">(master) $ git checkout topic</span>
+Branch topic set up to track remote branch topic from origin.
+Switched to a new branch 'topic'
+<span class="blue">(topic) $</span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Better visualization of branches</h2>
+						<p>Two options are useful for <code>git branch</code>:</p>
+						<p><code>-a</code> lists all local <em>and</em> remote branches.</p>
+						<p><code>-vv</code> adds the first commit lines and, for the tracked branch, the state of the tracking.</p>
+						<pre><code data-trim data-noescape class="no-highlight barely-smaller">
+<span class="blue">(2014-octobre u+1) $ git branch -avv</span>
+* <span class="green">2014-octobre</span>                 abaca0f [<span class="blue">origin/2014-october: ahead 1</span>] Removing old demos
+  legacy                       41b5bf7 [<span class="blue">origin/legacy</span>] Bash packaging script + debrief Zip file
+  master                       0208acb [<span class="blue">origin/master</span>] Fix .groc.json
+  v2014                        521350a [<span class="blue">origin/v2014</span>: behind 2] Backport Backbone plugins target link towards backplug.io
+  v2015                        27b1791 [<span class="blue">origin/v2015</span>] Updated docblocks
+  <span class="red">remotes/origin/2014-october</span>  10ad1b1 Updated annotated source code
+  <span class="red">remotes/origin/bs3</span>           49bc984 In-session tweaks
+  <span class="red">remotes/origin/bs3-basis</span>     650f025 Tweak export connectivity
+...
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Which branch contains what?</h2>
+						<p>Use case: commit <code>73abc4f</code> is the source of the bug, and you want to know where you need to propagate the fix.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git branch -a <u>--contains 73abc4f</u></span>
+* <span class="green">master</span>
+  stats
+  <span class="red">origin/master
+  origin/3-2-stable
+  origin/stats</span>
+            </code></pre>
+            			<p>Use case: Are there any branches not yet merged in <code>master</code>?</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git branch -a <u>--no-merged</u></span>
+  stats
+  <span class="red">origin/fix/143
+  origin/fix/148
+  origin/stats
+  origin/max/experiment-web-audio</span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Merging</h2>
+						<p>You should only merge when you need to <strong>identify that a feature has been integrated in the target branch</strong> (bugfix, feature, story, etc.).</p>
+						<p>If the branch is a child, prevent fast-forwards:</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git merge <u>--no-ff</u> fix/143</span>
+            </code></pre>
+            			<p>Want to details the merged commits?</p>
+        				<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git merge <u>--log</u> stats</span>
+            </code></pre>
+            			<p>Or, if you want to do it all the time:</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git config --global <u>merge.log true</u></span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Using the dash</h2>
+						<p>Very often, when you <code>merge</code>, <code>rebase</code>, <code>cherry-pick</code> or simply <code>checkout</code>, this is made from/to the previous branch (the one you were on earlier).</p>
+						<p>Just as you can use <code>cd -</code> in your shell to go back to the previous directory, you can use <code>-</code> to go back to the previous branch. This is a shortcut for the classic <code>@{-1}</code>.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git rebase master experiment
+(experiment) $ git checkout <u>-</u>
+(master) $</span>
+            </code></pre>
+
+            <pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(fix/148) $ git checkout 3-2-stable
+(3-2-stable) $ git merge <u>-</u>
+(3-2-stable) $ git checkout master
+(master) $ git cherry-pick <u>-</u>
+(master) $</span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>So, you worked on the wrong branch...</h2>
+						<p>Use case: You thought that your feature would have taken 1 commit, and 10 minutes...</p>
+						<p>However, 3 commits and 2 hours later, here you are, and there's still work to do!</p>
+						<p>You should have made a branch...</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">  (master) $ git <u>branch</u> fix/158
+  (master) $ git <u>reset</u> --soft <u>HEAD~3</u>
+(master +) $ git <u>checkout</u> fix/158
+ (fix/158) $</span>
+            </code></pre>
+
+            			<img src="assets/git-branch-worthy.png" class="schema">
+					</section>
+
+					<section>
+						<h2>Cherry-picking</h2>
+						<p>Fetching a unique commit, without its history.</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git <u>cherry-pick</u> 3-2-stable</span>
+            </code></pre>
+            			<p><code>git cherry</code> will help you choose candidates:</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git cherry -v HEAD topic</span>
+<u>+</u> 3abb73d7cc8d8655f8b99816fed56c6030c28551 /img/ -> /images/
+<u>-</u> ba05b8d03de5540181af34a10f1b07debb0ea5fc Stats JS
+<u>+</u> 363f53d53d78384f29dc68d900b04ac0b56d20f6 Nav stats
+            </code></pre>
+            			<p>Or, using <code>git log --cherry</code> (preferred):</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master) $ git lg --cherry HEAD...topic</span>
+<u>*</u> <span class="red">363f53d</span> - (<span class="green">topic</span>) Nav stats <span class="green">(Charles Sarrazin 1 year, 1 month ago)</span>
+<u>=</u> <span class="red">ba05b8d</span> - Stats JS <span class="green">(Charles Sarrazin 1 year, 1 month ago)</span>
+<u>*</u> <span class="red">3abb73d</span> - /img/ -> /images/ <span class="green">(Charles Sarrazin 1 year, 1 month ago)</span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Handling conflicts</h2>
+						<p>Most conflicts are <strong>simple to handle</strong>.</p>
+						<p>You just need the correct methodology:</p>
+						<ol>
+							<li><code>git status</code> as soon as possible to check what is wrong</li>
+							<li>Examine the first conflicting file (IDE/text editor or <code>git mergetool</code>)</li>
+							<li>Choosing between the two versions of the file*</li>
+							<li><code>git add</code> to mark the conflict as resolved.</li>
+							<li>If there are remaining conflicts, go back to (2).</li>
+							<li>Otherwise, finalize using <code>git commit</code> or <code>git rebase --continue</code></li>
+						</ol>
+						<footer>* This is simple most of the time, but may sometimes require some more information</footer>
+					</section>
+
+					<section>
+						<h2>Anatomy of a conflict</h2>
+						<p>By default, <code>merge</code> style:</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+SVN est un outil de gestion de source largement répandu
+et extrêmement pratique.
+=======
+SVN est un outil de gestion de source largement répandu
+malgré sa profonde stupidité et la plaie de son usage.
+>>>>>>> truth
+            </code></pre>
+            			<p>It is often useful to see the pre-conflict version:</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+SVN est un outil de gestion de source largement répandu
+et extrêmement pratique.
+<u>||||||| merged common ancestors
+SVN est un outil de gestion de source largement répandu.</u>
+=======
+SVN est un outil de gestion de source largement répandu
+malgré sa profonde stupidité et la plaie de son usage.
+>>>>>>> truth
+            </code></pre>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">$ git config --global <u>merge.conflictStyle diff3</u></span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Examining snapshots</h2>
+						<p>Sometimes, using the diff is not enough, especially when the conflicting code references other parts, which could sucessfully be merged.</p>
+						<p>In this case, you can examine the snapshots from the recipient-side:</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master *) $ git show <u>:2</u>:intro.md</span>
+<span class="comment"># ou : git show HEAD:intro.md
+# ou : git show master:intro.md</span>
+            </code></pre>
+            			<p>Or from the merged code side:</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master *) $ git show <u>:3</u>:intro.md</span>
+<span class="comment"># ou : git show MERGE_HEAD:intro.md
+# ou : git show truth:intro.md</span>
+            </code></pre>
+            			<p>Or from the common ancestor (before the divergence):</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master *) $ git show <u>:1</u>:intro.md</span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>The merge log</h2>
+						<p>Very rarely, even snapshots may not be enough to understand the problem, and you may want to retrace the changes until the head of the branches.</p>
+						<p>This can be done using the already seen <code>A...B</code> syntax, but as during a merge, Git has access to all the context, a simple <code>--merge</code> is enough:</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master *) $ git lg <u>--merge</u> -p intro.md</span>
+* <span class="red">9d8dafd</span> - (<span class="green">truth</span>) Truth <span class="green">(Charles Sarrazin 12 minutes ago)</span>
+<span class="comment">...and here the diff...</span>
+* <span class="red">f068b20</span> - (<span class="blue">HEAD</span>, <span class="green">master</span>) Disinfo <span class="green">(Charles Sarrazin 12 minutes ago)</span>
+<span class="comment">...and here the diff...</span>
+<span class="blue">(master *) $</span>
+            </code></pre>
+					</section>
+
+					<section>
+						<h2>Giving up</h2>
+						<p>If you <strong>really</strong> don't have enough information to resolve the conflict, you can cancel the conflict and return to a clean state:</p>
+						<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master *) $ git merge <u>--abort</u></span>
+<span class="blue">(master) $</span>
+            </code></pre>
+            			<p>Or, when in a <code>rebase</code>:</p>
+            			<pre><code data-trim data-noescape class="no-highlight">
+<span class="blue">(master *) $ git rebase <u>--abort</u></span>
+<span class="blue">(master) $</span>
+            </code></pre>
+					</section>
+				</section>
+
+				<section>
+					<h1>The end</h1>
+					<p>You can find the slides <a target="_blank" href="https://csarrazi-slides.github.io/git-for-teams/">on github</a></p>
+				</section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>

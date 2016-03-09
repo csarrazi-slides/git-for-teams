@@ -1,0 +1,43 @@
+b.wrong, b.right {
+  font-weight: normal;
+  padding: 0.1em 0.5em 0.1em 0; border-radius: 0.5em;
+}
+b.wrong:empty, b.right:empty { padding-left: 0.5em; }
+b.wrong { background: #fdd; }
+b.wrong::after {
+  content: " ✖ KO";
+  font-weight: bold;
+  color: #b00;
+}
+
+b.right { background: #dfd; }
+b.right::after {
+  content: " ✔ OK";
+  font-weight: bold;
+  color: #090;
+}
+
+.reveal pre > code.smaller { font-size: 80%; line-height: 1.3em; }
+.reveal pre > code.barely-smaller { font-size: 95%; line-height: 1.3em; }
+
+.reveal pre > code u, b.hl {
+  background: #fe9; padding: 0.1em 0.3em 0.1em 0; border-radius: 0.5em;
+  text-decoration: none;
+}
+
+.reveal pre > code .green  { color: #0b0; }
+.reveal pre > code .red    { color: red; }
+.reveal pre > code .yellow { color: #f80; }
+.reveal pre > code .blue   { color: #0091d4; }
+
+.reveal pre > code.smaller .green  { color: #090; }
+.reveal pre > code.smaller .red    { color: #a00; }
+.reveal pre > code.smaller .yellow { color: #c50; }
+.reveal pre > code.smaller .blue   { color: #08c; }
+
+.theme-color-coral-blue h3 > code, .theme-color-forest-yellow p > code {
+  color: yellow;
+}
+.theme-color-asphalt-orange .reveal a {
+  color: #f80;
+}
